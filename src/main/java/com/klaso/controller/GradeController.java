@@ -35,7 +35,7 @@ public class GradeController {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(new ApiResponse<>(404, "Note non trouvée", null)).build();
         }
-        return Response.ok(new ApiResponse<>(200, "Note trouvée", grade)).build();
+        return Response.ok(new ApiResponse<>(200, "Note trouvée", new GradeDto(grade))).build();
     }
 
     @GET
@@ -56,11 +56,28 @@ public class GradeController {
         return Response.ok(new ApiResponse<>(200, message, gradeDtos)).build();
     }
 
+    @GET
+    @Path("/classroom/{classroomId}")
+    public Response getByClassroomId(@PathParam("classroomId") Long classroomId) {
+        List<Grade> grades = gradeService.getGradesByClassroomId(classroomId);
+        List<GradeDto> gradeDtos = grades.stream().map(GradeDto::new).collect(Collectors.toList());
+
+        String message;
+        if (!gradeDtos.isEmpty()) {
+            GradeDto firstGrade = gradeDtos.get(0);
+            message = "Notes de la classe " + firstGrade.getClassroomName();
+        } else {
+            message = "Aucune note trouvée pour cette classe";
+        }
+
+        return Response.ok(new ApiResponse<>(200, message, gradeDtos)).build();
+    }
+
     @POST
-    public Response create(Grade grade) {
-        Grade saved = gradeService.create(grade);
+    public Response create(GradeDto gradeDto) {
+        Grade saved = gradeService.create(gradeDto);
         return Response.status(Response.Status.CREATED)
-                .entity(new ApiResponse<>(201, "Note créée avec succès", saved)).build();
+                .entity(new ApiResponse<>(201, "Note créée avec succès", new GradeDto(saved))).build();
     }
 
     @PUT
@@ -71,7 +88,7 @@ public class GradeController {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(new ApiResponse<>(404, "Note non trouvée", null)).build();
         }
-        return Response.ok(new ApiResponse<>(200, "Note mise à jour", updated)).build();
+        return Response.ok(new ApiResponse<>(200, "Note mise à jour", new GradeDto(updated))).build();
     }
 
     @DELETE

@@ -1,6 +1,8 @@
 package com.klaso.controller;
 
 import com.klaso.dto.ApiResponse;
+import com.klaso.dto.ForgotPasswordDto;
+import com.klaso.dto.ResetPasswordDto;
 import com.klaso.dto.UserLoginDTO;
 import com.klaso.dto.UserRegisterDTO;
 import com.klaso.dto.UserResponseDTO;
@@ -43,5 +45,20 @@ public class UserController {
         String email = ctx.getUserPrincipal().getName();
         User user = userService.getUserByEmail(email);
         return Response.ok(new ApiResponse<>(200, "Infos utilisateur", new UserResponseDTO(user))).build();
+    }
+
+    // Nouveaux endpoints pour la réinitialisation de mot de passe
+    @POST
+    @Path("/forgot-password")
+    public Response forgotPassword(ForgotPasswordDto dto) {
+        userService.sendPasswordResetEmail(dto.email);
+        return Response.ok(new ApiResponse<>(200, "Email de réinitialisation envoyé", null)).build();
+    }
+
+    @POST
+    @Path("/reset-password")
+    public Response resetPassword(ResetPasswordDto dto) {
+        userService.resetPassword(dto.token, dto.newPassword);
+        return Response.ok(new ApiResponse<>(200, "Mot de passe réinitialisé avec succès", null)).build();
     }
 }

@@ -23,6 +23,9 @@ public class GradeDto {
     private Long classroomId;
     private String classroomName;
 
+    // Required by Jackson for deserialization of request bodies
+    public GradeDto() {}
+
     public GradeDto(Grade grade) {
         this.id = grade.getId();
         this.value = grade.getValue();

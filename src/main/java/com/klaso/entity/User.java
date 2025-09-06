@@ -25,6 +25,13 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    // Nouveaux champs pour la réinitialisation de mot de passe
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expires_at")
+    private Instant resetTokenExpiresAt;
+
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
     private Instant createdAt;
@@ -87,6 +94,22 @@ public class User {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
+
+    public Instant getResetTokenExpiresAt() {
+        return resetTokenExpiresAt;
+    }
+
+    public void setResetTokenExpiresAt(Instant resetTokenExpiresAt) {
+        this.resetTokenExpiresAt = resetTokenExpiresAt;
     }
 
 }

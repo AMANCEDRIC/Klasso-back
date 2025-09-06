@@ -32,6 +32,18 @@ quarkus:
       "com.klaso":
         level: DEBUG
 
+  # Configuration pour l'envoi d'emails
+  mailer:
+    from: noreply@klaso.com
+    mock: true # Pour le développement, utilise un mock
+    # Pour la production, configurez un vrai serveur SMTP :
+    # host: smtp.gmail.com
+    # port: 587
+    # username: votre-email@gmail.com
+    # password: votre-mot-de-passe-app
+    # ssl: false
+    # tls: true
+
 # Clés JWT
 mp:
   jwt:
