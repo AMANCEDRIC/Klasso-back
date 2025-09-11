@@ -23,6 +23,9 @@ public class GradeDto {
     private Long classroomId;
     private String classroomName;
 
+    private Long evaluationId;
+    private String status;
+
     // Required by Jackson for deserialization of request bodies
     public GradeDto() {}
 
@@ -46,6 +49,12 @@ public class GradeDto {
             this.classroomId = grade.getClassroom().getId();
             this.classroomName = grade.getClassroom().getName();
         }
+
+        if (grade.getEvaluation() != null) {
+            this.evaluationId = grade.getEvaluation().getId();
+        }
+
+        this.status = grade.getStatus();
     }
 
     public Long getId() {

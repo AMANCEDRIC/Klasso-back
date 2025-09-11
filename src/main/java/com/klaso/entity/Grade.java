@@ -41,6 +41,10 @@ public class Grade {
     private Classroom classroom;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "evaluation_id")
+    private Evaluation evaluation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     private Student student;
     @Column(name = "created_at")
@@ -48,6 +52,9 @@ public class Grade {
 
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @Column(name = "status", length = 32)
+    private String status;
 
     public Long getId() {
         return id;
@@ -121,6 +128,14 @@ public class Grade {
         this.classroom = classroom;
     }
 
+    public Evaluation getEvaluation() {
+        return evaluation;
+    }
+
+    public void setEvaluation(Evaluation evaluation) {
+        this.evaluation = evaluation;
+    }
+
     public Student getStudent() {
         return student;
     }
@@ -142,6 +157,14 @@ public class Grade {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
 }

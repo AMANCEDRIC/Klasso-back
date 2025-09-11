@@ -73,6 +73,21 @@ public class GradeController {
         return Response.ok(new ApiResponse<>(200, message, gradeDtos)).build();
     }
 
+    @GET
+    @Path("/student/{studentId}/classroom/{classroomId}")
+    public Response getByStudentAndClassroom(@PathParam("studentId") Long studentId,
+                                             @PathParam("classroomId") Long classroomId) {
+        List<Grade> grades = gradeService.getGradesByStudentAndClassroom(studentId, classroomId);
+        List<GradeDto> gradeDtos = grades.stream().map(GradeDto::new).collect(Collectors.toList());
+
+        String message = gradeDtos.isEmpty()
+                ? "Aucune note trouvée pour cet élève dans cette classe"
+                : "Notes de l'élève " + gradeDtos.get(0).getStudentFirstName() + " " +
+                  gradeDtos.get(0).getStudentLastName() + " dans la classe " + gradeDtos.get(0).getClassroomName();
+
+        return Response.ok(new ApiResponse<>(200, message, gradeDtos)).build();
+    }
+
     @POST
     public Response create(GradeDto gradeDto) {
         Grade saved = gradeService.create(gradeDto);

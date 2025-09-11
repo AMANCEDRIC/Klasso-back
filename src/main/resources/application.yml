@@ -34,15 +34,14 @@ quarkus:
 
   # Configuration pour l'envoi d'emails
   mailer:
-    from: noreply@klaso.com
-    mock: true # Pour le développement, utilise un mock
-    # Pour la production, configurez un vrai serveur SMTP :
-    # host: smtp.gmail.com
-    # port: 587
-    # username: votre-email@gmail.com
-    # password: votre-mot-de-passe-app
-    # ssl: false
-    # tls: true
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username: 267ab2f4f92cbe    # ton user
+    password: 7b907c169c3bc7          # ton password
+    ssl: false
+    start-tls: REQUIRED
+    from: "no-reply@klaso.local"
+    mock: false
 
 # Clés JWT
 mp:

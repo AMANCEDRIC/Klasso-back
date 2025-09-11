@@ -43,6 +43,10 @@ public class GradeService {
         return gradeRepository.findByClassroomId(classroomId);
     }
 
+    public List<Grade> getGradesByStudentAndClassroom(Long studentId, Long classroomId) {
+        return gradeRepository.findByStudentIdAndClassroomId(studentId, classroomId);
+    }
+
     @Transactional
     public Grade create(GradeDto dto) {
         Grade grade = new Grade();

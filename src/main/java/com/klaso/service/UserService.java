@@ -75,8 +75,11 @@ public class UserService {
         userRepository.persist(user);
 
         // Envoyer l'email
-        String resetLink = "http://localhost:3000/reset-password?token=" + resetToken;
-        String emailBody = String.format(
+        String resetLink = "http://localhost:4200/reset-password?token=" + resetToken;
+        String userName = user.getFirstName() != null ? user.getFirstName() : "Utilisateur";
+        
+        // Version texte pour les clients qui ne supportent pas HTML
+        String textBody = String.format(
             "Bonjour %s,\n\n" +
             "Vous avez demandé une réinitialisation de votre mot de passe.\n\n" +
             "Cliquez sur le lien suivant pour réinitialiser votre mot de passe :\n" +
@@ -85,11 +88,89 @@ public class UserService {
             "Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.\n\n" +
             "Cordialement,\n" +
             "L'équipe Klaso",
-            user.getFirstName() != null ? user.getFirstName() : "Utilisateur",
+            userName,
             resetLink
         );
+        
+        // Version HTML avec design moderne
+        String htmlBody = String.format(
+            "<!DOCTYPE html>" +
+            "<html>" +
+            "<head>" +
+            "    <meta charset=\"UTF-8\">" +
+            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
+            "    <title>Réinitialisation de mot de passe</title>" +
+            "    <style>" +
+            "        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }" +
+            "        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }" +
+            "        .header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 30px; text-align: center; }" +
+            "        .header h1 { margin: 0; font-size: 28px; font-weight: 300; }" +
+            "        .content { padding: 40px 30px; }" +
+            "        .greeting { font-size: 18px; color: #333; margin-bottom: 20px; }" +
+            "        .message { font-size: 16px; color: #666; line-height: 1.6; margin-bottom: 30px; }" +
+            "        .button-container { text-align: center; margin: 30px 0; }" +
+            "        .reset-button { " +
+            "            display: inline-block; " +
+            "            background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); " +
+            "            color: white; " +
+            "            text-decoration: none; " +
+            "            padding: 15px 30px; " +
+            "            border-radius: 25px; " +
+            "            font-size: 16px; " +
+            "            font-weight: 600; " +
+            "            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); " +
+            "            transition: transform 0.2s ease;" +
+            "        }" +
+            "        .reset-button:hover { transform: translateY(-2px); }" +
+            "        .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0; }" +
+            "        .warning-text { color: #856404; font-size: 14px; margin: 0; }" +
+            "        .footer { background-color: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px; }" +
+            "        .link-fallback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; word-break: break-all; }" +
+            "        .link-fallback a { color: #667eea; text-decoration: none; }" +
+            "    </style>" +
+            "</head>" +
+            "<body>" +
+            "    <div class=\"container\">" +
+            "        <div class=\"header\">" +
+            "            <h1>🔐 Klaso</h1>" +
+            "        </div>" +
+            "        <div class=\"content\">" +
+            "            <div class=\"greeting\">Bonjour %s,</div>" +
+            "            <div class=\"message\">" +
+            "                Vous avez demandé une réinitialisation de votre mot de passe. " +
+            "                Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe sécurisé." +
+            "            </div>" +
+            "            <div class=\"button-container\">" +
+            "                <a href=\"%s\" class=\"reset-button\">Réinitialiser mon mot de passe</a>" +
+            "            </div>" +
+            "            <div class=\"warning\">" +
+            "                <p class=\"warning-text\">" +
+            "                    ⚠️ Ce lien est valide pendant <strong>1 heure</strong> seulement. " +
+            "                    Si vous n'avez pas demandé cette réinitialisation, ignorez cet email." +
+            "                </p>" +
+            "            </div>" +
+            "            <div class=\"link-fallback\">" +
+            "                <p style=\"margin: 0 0 10px 0; font-size: 14px; color: #666;\">" +
+            "                    Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :" +
+            "                </p>" +
+            "                <a href=\"%s\">%s</a>" +
+            "            </div>" +
+            "        </div>" +
+            "        <div class=\"footer\">" +
+            "            <p>Cordialement,<br><strong>L'équipe Klaso</strong></p>" +
+            "            <p style=\"font-size: 12px; color: #999; margin-top: 20px;\">" +
+            "                Cet email a été envoyé automatiquement, merci de ne pas y répondre." +
+            "            </p>" +
+            "        </div>" +
+            "    </div>" +
+            "</body>" +
+            "</html>",
+            userName, resetLink, resetLink, resetLink
+        );
 
-        mailer.send(Mail.withText(email, "Réinitialisation de votre mot de passe - Klaso", emailBody));
+        // Envoyer l'email avec version HTML et texte
+        mailer.send(Mail.withHtml(email, "Réinitialisation de votre mot de passe - Klaso", htmlBody)
+                .setText(textBody));
     }
 
     @Transactional
