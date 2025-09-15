@@ -1,24 +1,24 @@
 quarkus:
   http:
     host: 0.0.0.0
-    port: 8081
-    cors:
-      ~: true
-      origins: "*"
-      methods: "*"
-      headers: "*"
-      exposed-headers: "*"
+    port: ${PORT:8080}
+  cors:
+    ~: true
+    origins: "*"
+    methods: "*"
+    headers: "*"
+    exposed-headers: "*"
 
   datasource:
     db-kind: mysql
-    username: root
-    password:
+    username: ${MYSQLUSER:root}
+    password: ${MYSQLPASSWORD:}
     jdbc:
-      url: jdbc:mysql://localhost:3306/klaso_db
+      url: jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:klaso_db}?useSSL=true&requireSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 
   hibernate-orm:
     database:
-      generation: none # ou `validate` si tu utilises liquibase
+      generation: none
     log:
       sql: true
 
@@ -32,18 +32,16 @@ quarkus:
       "com.klaso":
         level: DEBUG
 
-  # Configuration pour l'envoi d'emails
   mailer:
-    host: sandbox.smtp.mailtrap.io
-    port: 2525
-    username: 267ab2f4f92cbe    # ton user
-    password: 7b907c169c3bc7          # ton password
+    host: ${MAIL_HOST:sandbox.smtp.mailtrap.io}
+    port: ${MAIL_PORT:2525}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     ssl: false
     start-tls: REQUIRED
-    from: "no-reply@klaso.local"
+    from: ${MAIL_FROM:no-reply@klaso.local}
     mock: false
 
-# Clés JWT
 mp:
   jwt:
     verify:
