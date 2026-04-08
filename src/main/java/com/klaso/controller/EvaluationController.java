@@ -4,6 +4,7 @@ import com.klaso.dto.ApiResponse;
 import com.klaso.dto.EvaluationDto;
 import com.klaso.entity.Evaluation;
 import com.klaso.service.EvaluationService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 @Path("/api/evaluations")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed({"TEACHER", "ADMIN"})
 public class EvaluationController {
 
     @Inject

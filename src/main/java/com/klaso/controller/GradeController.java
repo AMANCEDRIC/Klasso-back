@@ -4,6 +4,7 @@ import com.klaso.dto.ApiResponse;
 import com.klaso.dto.GradeDto;
 import com.klaso.entity.Grade;
 import com.klaso.service.GradeService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 @Path("/api/grades")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed({"TEACHER", "ADMIN"})
 public class GradeController {
 
     @Inject

@@ -3,6 +3,7 @@ package com.klaso.controller;
 import com.klaso.dto.ApiResponse;
 import com.klaso.entity.Grade;
 import com.klaso.repository.GradeRepository;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Path("/api/grades/average")
 @Produces(MediaType.APPLICATION_JSON)
+@RolesAllowed({"TEACHER", "ADMIN"})
 public class GradeAverageController {
 
     @Inject

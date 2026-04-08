@@ -12,6 +12,10 @@ public class Establishment {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private Account owner;
+
     @Column(name = "name")
     private String name;
 
@@ -117,6 +121,14 @@ public class Establishment {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Account getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Account owner) {
+        this.owner = owner;
     }
 
 }

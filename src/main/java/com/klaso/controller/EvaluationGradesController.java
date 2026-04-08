@@ -8,6 +8,7 @@ import com.klaso.entity.Student;
 import com.klaso.repository.EvaluationRepository;
 import com.klaso.repository.GradeRepository;
 import com.klaso.repository.StudentRepository;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @Path("/api/evaluations/{evaluationId}/grades")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed({"TEACHER", "ADMIN"})
 public class EvaluationGradesController {
 
     public static class BulkGradesRequest {

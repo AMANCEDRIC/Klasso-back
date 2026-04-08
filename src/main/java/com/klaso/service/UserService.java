@@ -119,7 +119,7 @@ public class UserService {
                 .claim("id", user.getId())
                 .claim("email", user.getEmail())
                 .claim("name", user.getFirstName() + " " + user.getLastName())
-                .claim("role", profile.getCode())
+                .groups(profile.getCode()) // Utilise 'groups' pour les @RolesAllowed de Quarkus
                 .sign();
     }
 

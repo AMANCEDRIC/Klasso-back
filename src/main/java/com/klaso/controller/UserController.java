@@ -41,7 +41,7 @@ public class UserController {
 
     @GET
     @Path("/me")
-    @RolesAllowed("user")
+    @RolesAllowed({"TEACHER", "ADMIN"})
     public Response getProfile(@Context SecurityContext ctx) {
         String email = ctx.getUserPrincipal().getName();
         User user = userService.getUserByEmail(email);

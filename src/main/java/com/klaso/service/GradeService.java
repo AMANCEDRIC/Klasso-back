@@ -4,16 +4,15 @@ import com.klaso.dto.GradeDto;
 import com.klaso.entity.Evaluation;
 import com.klaso.entity.Grade;
 import com.klaso.entity.Student;
-import com.klaso.repository.EvaluationRepository;
 import com.klaso.repository.GradeRepository;
-import com.klaso.repository.StudentRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.ForbiddenException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GradeService {
@@ -22,24 +21,49 @@ public class GradeService {
     GradeRepository gradeRepository;
 
     @Inject
-    StudentRepository studentRepository;
+    StudentService studentService;
 
     @Inject
-    EvaluationRepository evaluationRepository;
+    EvaluationService evaluationService;
 
     public List<Grade> getAll() {
-        return gradeRepository.listAll();
+        // Filtrage global par accès étudiant/évaluation
+        List<Grade> all = gradeRepository.listAll();
+        return all.stream()
+                .filter(g -> {
+                    try {
+                        if (g.getStudent() != null) {
+                            studentService.getStudentById(g.getStudent().getId());
+                        }
+                        return true;
+                    } catch (ForbiddenException e) {
+                        return false;
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     public Grade findById(Long id) {
-        return gradeRepository.findById(id);
+        Grade grade = gradeRepository.findById(id);
+        if (grade == null) return null;
+        
+        // Sécurisé via studentService
+        if (grade.getStudent() != null) {
+            studentService.getStudentById(grade.getStudent().getId());
+        }
+        
+        return grade;
     }
 
     public List<Grade> getGradesByStudentId(Long studentId) {
+        // studentService jette Forbidden si pas d'accès
+        studentService.getStudentById(studentId);
         return gradeRepository.findByStudentId(studentId);
     }
 
     public List<Grade> getGradesByEvaluationId(Long evaluationId) {
+        // evaluationService jette Forbidden si pas d'accès
+        evaluationService.findById(evaluationId);
         return gradeRepository.findByEvaluationId(evaluationId);
     }
 
@@ -56,18 +80,15 @@ public class GradeService {
         grade.setAppreciation(dto.getAppreciation());
 
         if (dto.getStudentId() != null) {
-            Student student = studentRepository.findById(dto.getStudentId());
-            if (student == null) {
-                throw new NotFoundException("Élève introuvable");
-            }
+            // studentService sécurisé
+            studentService.getStudentById(dto.getStudentId());
+            Student student = studentService.studentRepository.findById(dto.getStudentId());
             grade.setStudent(student);
         }
 
         if (dto.getEvaluationId() != null) {
-            Evaluation evaluation = evaluationRepository.findById(dto.getEvaluationId());
-            if (evaluation == null) {
-                throw new NotFoundException("Évaluation introuvable");
-            }
+            // evaluationService sécurisé
+            Evaluation evaluation = evaluationService.findById(dto.getEvaluationId());
             grade.setEvaluation(evaluation);
         }
 
@@ -79,7 +100,7 @@ public class GradeService {
 
     @Transactional
     public Grade update(Long id, GradeDto dto) {
-        Grade existing = gradeRepository.findById(id);
+        Grade existing = findById(id); // déjà sécurisé
         if (existing == null) return null;
 
         existing.setValue(dto.getValue());
@@ -91,7 +112,7 @@ public class GradeService {
         existing.setAppreciation(dto.getAppreciation());
 
         if (dto.getEvaluationId() != null) {
-            Evaluation evaluation = evaluationRepository.findById(dto.getEvaluationId());
+            Evaluation evaluation = evaluationService.findById(dto.getEvaluationId());
             if (evaluation != null) {
                 existing.setEvaluation(evaluation);
             }
@@ -103,6 +124,8 @@ public class GradeService {
 
     @Transactional
     public boolean delete(Long id) {
+        Grade existing = findById(id); // déjà sécurisé
+        if (existing == null) return false;
         return gradeRepository.deleteById(id);
     }
 }

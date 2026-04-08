@@ -5,6 +5,7 @@ import com.klaso.dto.ClassroomDto;
 import com.klaso.dto.ClassroomResponseDto;
 import com.klaso.entity.Classroom;
 import com.klaso.service.ClassroomService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -15,6 +16,7 @@ import java.util.List;
 @Path("/api/classrooms")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed({"TEACHER", "ADMIN"})
 public class ClassroomController {
 
     @Inject

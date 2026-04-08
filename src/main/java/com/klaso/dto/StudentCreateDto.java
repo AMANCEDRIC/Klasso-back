@@ -13,11 +13,12 @@ public class StudentCreateDto {
     private Long classroomId;
 
     // Constructeurs
-    public StudentCreateDto() {}
+    public StudentCreateDto() {
+    }
 
-    public StudentCreateDto(String firstName, String lastName, LocalDate dateOfBirth, 
-                           String email, String parentName, String parentEmail, 
-                           String parentPhone, Long classroomId) {
+    public StudentCreateDto(String firstName, String lastName, LocalDate dateOfBirth,
+            String email, String parentName, String parentEmail,
+            String parentPhone, Long classroomId) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;

@@ -3,16 +3,17 @@ package com.klaso.service;
 import com.klaso.entity.Classroom;
 import com.klaso.entity.Evaluation;
 import com.klaso.entity.Period;
-import com.klaso.repository.ClassroomRepository;
 import com.klaso.repository.EvaluationRepository;
 import com.klaso.repository.PeriodRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class EvaluationService {
@@ -21,25 +22,31 @@ public class EvaluationService {
     EvaluationRepository evaluationRepository;
 
     @Inject
-    ClassroomRepository classroomRepository;
+    ClassroomService classroomService;
 
     @Inject
     PeriodRepository periodRepository;
 
     public List<Evaluation> listByClassroom(Long classroomId) {
+        // Sécurisé par classroomService
+        classroomService.findById(classroomId);
         return evaluationRepository.findByClassroomId(classroomId);
     }
 
     public Evaluation findById(Long id) {
-        return evaluationRepository.findById(id);
+        Evaluation evaluation = evaluationRepository.findById(id);
+        if (evaluation == null) return null;
+        
+        // Sécurisé par classroomService via l'établissement
+        classroomService.findById(evaluation.getClassroom().getId());
+        
+        return evaluation;
     }
 
     @Transactional
     public Evaluation create(Evaluation evaluation, Long classroomId, Long periodId) {
-        Classroom classroom = classroomRepository.findById(classroomId);
-        if (classroom == null) {
-            throw new NotFoundException("Classe introuvable");
-        }
+        // Sécurisé par classroomService
+        Classroom classroom = classroomService.findById(classroomId);
         evaluation.setClassroom(classroom);
 
         if (periodId != null) {

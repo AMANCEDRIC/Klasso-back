@@ -48,6 +48,7 @@ quarkus:
 mp:
   jwt:
     verify:
+      issuer: klaso
       publickey:
         location: META-INF/publicKey.pem
 
@@ -56,3 +57,5 @@ smallrye:
     sign:
       key:
         location: META-INF/privateKey.pem
+    new-token:
+      lifespan: 86400

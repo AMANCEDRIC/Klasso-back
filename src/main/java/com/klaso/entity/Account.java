@@ -1,5 +1,6 @@
 package com.klaso.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -24,15 +25,19 @@ public class Account {
     @Column(name = "username", nullable = false, length = 200)
     private String username;
 
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @JsonIgnore
     @Column(name = "session_token")
     private String sessionToken;
 
+    @JsonIgnore
     @Column(name = "reset_token")
     private String resetToken;
 
+    @JsonIgnore
     @Column(name = "reset_token_expires_at")
     private Instant resetTokenExpiresAt;
 
