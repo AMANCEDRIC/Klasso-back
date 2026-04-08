@@ -13,11 +13,15 @@ public class GradeRepository implements PanacheRepository<Grade> {
         return list("student.id = ?1", studentId);
     }
 
+    public List<Grade> findByEvaluationId(Long evaluationId) {
+        return list("evaluation.id = ?1", evaluationId);
+    }
+
     public List<Grade> findByClassroomId(Long classroomId) {
-        return list("classroom.id = ?1", classroomId);
+        return list("evaluation.classroom.id = ?1", classroomId);
     }
 
     public List<Grade> findByStudentIdAndClassroomId(Long studentId, Long classroomId) {
-        return list("student.id = ?1 and classroom.id = ?2", studentId, classroomId);
+        return list("student.id = ?1 and evaluation.classroom.id = ?2", studentId, classroomId);
     }
 }

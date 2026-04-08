@@ -42,7 +42,8 @@ public class ClassroomService {
 
         Establishment establishment = establishmentService.findById(establishmentId);
         if (establishment == null) {
-            throw new WebApplicationException("Établissement non trouvé avec l'ID : " + establishmentId, Response.Status.NOT_FOUND);
+            throw new WebApplicationException("Établissement non trouvé avec l'ID : " + establishmentId,
+                    Response.Status.NOT_FOUND);
         }
 
         classroom.setEstablishment(establishment);
@@ -56,7 +57,8 @@ public class ClassroomService {
     @Transactional
     public Classroom update(Long id, Classroom data) {
         Classroom existing = classroomRepository.findById(id);
-        if (existing == null) return null;
+        if (existing == null)
+            return null;
 
         existing.setName(data.getName());
         existing.setLevel(data.getLevel());

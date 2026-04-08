@@ -1,10 +1,10 @@
 package com.klaso.service;
 
 import com.klaso.dto.GradeDto;
-import com.klaso.entity.Classroom;
+import com.klaso.entity.Evaluation;
 import com.klaso.entity.Grade;
 import com.klaso.entity.Student;
-import com.klaso.repository.ClassroomRepository;
+import com.klaso.repository.EvaluationRepository;
 import com.klaso.repository.GradeRepository;
 import com.klaso.repository.StudentRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -25,7 +25,7 @@ public class GradeService {
     StudentRepository studentRepository;
 
     @Inject
-    ClassroomRepository classroomRepository;
+    EvaluationRepository evaluationRepository;
 
     public List<Grade> getAll() {
         return gradeRepository.listAll();
@@ -39,12 +39,8 @@ public class GradeService {
         return gradeRepository.findByStudentId(studentId);
     }
 
-    public List<Grade> getGradesByClassroomId(Long classroomId) {
-        return gradeRepository.findByClassroomId(classroomId);
-    }
-
-    public List<Grade> getGradesByStudentAndClassroom(Long studentId, Long classroomId) {
-        return gradeRepository.findByStudentIdAndClassroomId(studentId, classroomId);
+    public List<Grade> getGradesByEvaluationId(Long evaluationId) {
+        return gradeRepository.findByEvaluationId(evaluationId);
     }
 
     @Transactional
@@ -52,12 +48,12 @@ public class GradeService {
         Grade grade = new Grade();
 
         grade.setValue(dto.getValue());
-        grade.setMaxValue(dto.getMaxValue());
-        grade.setCoefficient(dto.getCoefficient());
-        grade.setGradeType(dto.getGradeType());
-        grade.setSubject(dto.getSubject());
-        grade.setDescription(dto.getDescription());
-        grade.setGradeDate(dto.getGradeDate());
+        grade.setStatus(dto.getStatus());
+
+        if (dto.getIsAbsent() != null) {
+            grade.setIsAbsent(dto.getIsAbsent());
+        }
+        grade.setAppreciation(dto.getAppreciation());
 
         if (dto.getStudentId() != null) {
             Student student = studentRepository.findById(dto.getStudentId());
@@ -67,12 +63,12 @@ public class GradeService {
             grade.setStudent(student);
         }
 
-        if (dto.getClassroomId() != null) {
-            Classroom classroom = classroomRepository.findById(dto.getClassroomId());
-            if (classroom == null) {
-                throw new NotFoundException("Classe introuvable");
+        if (dto.getEvaluationId() != null) {
+            Evaluation evaluation = evaluationRepository.findById(dto.getEvaluationId());
+            if (evaluation == null) {
+                throw new NotFoundException("Évaluation introuvable");
             }
-            grade.setClassroom(classroom);
+            grade.setEvaluation(evaluation);
         }
 
         grade.setCreatedAt(Instant.now());
@@ -82,20 +78,26 @@ public class GradeService {
     }
 
     @Transactional
-    public Grade update(Long id, Grade data) {
+    public Grade update(Long id, GradeDto dto) {
         Grade existing = gradeRepository.findById(id);
         if (existing == null) return null;
 
-        existing.setValue(data.getValue());
-        existing.setMaxValue(data.getMaxValue());
-        existing.setCoefficient(data.getCoefficient());
-        existing.setGradeType(data.getGradeType());
-        existing.setSubject(data.getSubject());
-        existing.setDescription(data.getDescription());
-        existing.setGradeDate(data.getGradeDate());
-        existing.setClassroom(data.getClassroom());
-        existing.setUpdatedAt(Instant.now());
+        existing.setValue(dto.getValue());
+        existing.setStatus(dto.getStatus());
 
+        if (dto.getIsAbsent() != null) {
+            existing.setIsAbsent(dto.getIsAbsent());
+        }
+        existing.setAppreciation(dto.getAppreciation());
+
+        if (dto.getEvaluationId() != null) {
+            Evaluation evaluation = evaluationRepository.findById(dto.getEvaluationId());
+            if (evaluation != null) {
+                existing.setEvaluation(evaluation);
+            }
+        }
+
+        existing.setUpdatedAt(Instant.now());
         return existing;
     }
 
@@ -103,5 +105,4 @@ public class GradeService {
     public boolean delete(Long id) {
         return gradeRepository.deleteById(id);
     }
-
 }

@@ -6,6 +6,7 @@ import com.klaso.dto.ResetPasswordDto;
 import com.klaso.dto.UserLoginDTO;
 import com.klaso.dto.UserRegisterDTO;
 import com.klaso.dto.UserResponseDTO;
+import com.klaso.entity.Account;
 import com.klaso.entity.User;
 import com.klaso.service.UserService;
 import jakarta.annotation.security.RolesAllowed;
@@ -27,8 +28,8 @@ public class UserController {
     @POST
     @Path("/register")
     public Response register(UserRegisterDTO dto) {
-        User user = userService.register(dto);
-        return Response.ok(new ApiResponse<>(201, "Utilisateur créé", new UserResponseDTO(user))).build();
+        Account account = userService.register(dto);
+        return Response.ok(new ApiResponse<>(201, "Utilisateur créé", new UserResponseDTO(account))).build();
     }
 
     @POST

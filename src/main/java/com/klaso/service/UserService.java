@@ -2,7 +2,11 @@ package com.klaso.service;
 
 import com.klaso.dto.UserLoginDTO;
 import com.klaso.dto.UserRegisterDTO;
+import com.klaso.entity.Account;
+import com.klaso.entity.Profile;
 import com.klaso.entity.User;
+import com.klaso.repository.AccountRepository;
+import com.klaso.repository.ProfileRepository;
 import com.klaso.repository.UserRepository;
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
@@ -24,31 +28,98 @@ public class UserService {
     UserRepository userRepository;
 
     @Inject
+    AccountRepository accountRepository;
+
+    @Inject
+    ProfileRepository profileRepository;
+
+    @Inject
     Mailer mailer;
 
+//    @Transactional
+//    public User register(UserRegisterDTO dto) {
+//        User user = new User();
+//        user.setEmail(dto.email);
+//        user.setFirstName(dto.firstName);
+//        user.setLastName(dto.lastName);
+//        user.setPassword(BCrypt.hashpw(dto.password, BCrypt.gensalt()));
+//        user.setCreatedAt(Instant.now());
+//        user.setUpdatedAt(Instant.now());
+//        userRepository.persist(user);
+//        return user;
+//    }
+
+    // ... existing code ...
     @Transactional
-    public User register(UserRegisterDTO dto) {
+    public Account register(UserRegisterDTO dto) {
+        // 1. Créer l'utilisateur (personne)
         User user = new User();
         user.setEmail(dto.email);
         user.setFirstName(dto.firstName);
         user.setLastName(dto.lastName);
-        user.setPassword(BCrypt.hashpw(dto.password, BCrypt.gensalt()));
         user.setCreatedAt(Instant.now());
         user.setUpdatedAt(Instant.now());
         userRepository.persist(user);
-        return user;
+
+        // 2. Récupérer le profil choisi (ou TEACHER par défaut)
+        String roleCode = (dto.role != null && !dto.role.isBlank()) ? dto.role.toUpperCase() : "TEACHER";
+        Profile profile = profileRepository.findByCode(roleCode);
+        if (profile == null) {
+            throw new WebApplicationException("Profil '" + roleCode + "' introuvable", Response.Status.BAD_REQUEST);
+        }
+
+        // 3. Créer le compte
+        Account account = new Account();
+        account.setUser(user);
+        account.setProfile(profile);
+        account.setUsername(dto.email); // login = email
+        account.setPasswordHash(BCrypt.hashpw(dto.password, BCrypt.gensalt()));
+        account.setIsActive(true);
+        account.setDeleted(false);
+        account.setCreatedAt(Instant.now());
+        account.setUpdatedAt(Instant.now());
+        accountRepository.persist(account);
+
+        return account;
     }
 
+//    public String login(UserLoginDTO dto) {
+//        User user = userRepository.findByEmail(dto.email);
+//        if (user == null || !BCrypt.checkpw(dto.password, user.getPassword())) {
+//            throw new WebApplicationException("Invalid credentials", Response.Status.UNAUTHORIZED);
+//        }
+//        return Jwt.issuer("klaso")
+//                .upn(user.getEmail())
+//                .claim("id", user.getId())
+//                .claim("email", user.getEmail())
+//                .claim("name", user.getFirstName() + " " + user.getLastName())
+//                .sign();
+//    }
+
+    // ... existing code ...
     public String login(UserLoginDTO dto) {
-        User user = userRepository.findByEmail(dto.email);
-        if (user == null || !BCrypt.checkpw(dto.password, user.getPassword())) {
+        // 1. Récupérer le compte par username (email)
+        Account account = accountRepository.findByUsername(dto.email);
+        if (account == null || !Boolean.TRUE.equals(account.getIsActive()) || Boolean.TRUE.equals(account.getDeleted())) {
             throw new WebApplicationException("Invalid credentials", Response.Status.UNAUTHORIZED);
         }
+
+        // 2. Vérifier le mot de passe
+        if (!BCrypt.checkpw(dto.password, account.getPasswordHash())) {
+            // Optionnel: incrémenter connectionAttempt, bloquer après X essais
+            throw new WebApplicationException("Invalid credentials", Response.Status.UNAUTHORIZED);
+        }
+
+        User user = account.getUser();
+        Profile profile = account.getProfile();
+
+        // 3. Construire le JWT avec l'info de profil
         return Jwt.issuer("klaso")
-                .upn(user.getEmail())
+                .upn(account.getUsername())
                 .claim("id", user.getId())
                 .claim("email", user.getEmail())
                 .claim("name", user.getFirstName() + " " + user.getLastName())
+                .claim("role", profile.getCode())
                 .sign();
     }
 
@@ -58,25 +129,27 @@ public class UserService {
 
     @Transactional
     public void sendPasswordResetEmail(String email) {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
+        Account account = accountRepository.findByUsername(email);
+        if (account == null) {
             // Pour des raisons de sécurité, on ne révèle pas si l'email existe ou non
             return;
         }
+
+        User targetUser = account.getUser();
 
         // Générer un token unique
         String resetToken = UUID.randomUUID().toString();
         Instant expiresAt = Instant.now().plusSeconds(3600); // Token valide 1 heure
 
-        // Sauvegarder le token dans la base de données
-        user.setResetToken(resetToken);
-        user.setResetTokenExpiresAt(expiresAt);
-        user.setUpdatedAt(Instant.now());
-        userRepository.persist(user);
+        // Sauvegarder le token dans le compte
+        account.setResetToken(resetToken);
+        account.setResetTokenExpiresAt(expiresAt);
+        account.setUpdatedAt(Instant.now());
+        accountRepository.persist(account);
 
         // Envoyer l'email
         String resetLink = "http://localhost:4200/reset-password?token=" + resetToken;
-        String userName = user.getFirstName() != null ? user.getFirstName() : "Utilisateur";
+        String userName = targetUser.getFirstName() != null ? targetUser.getFirstName() : "Utilisateur";
         
         // Version texte pour les clients qui ne supportent pas HTML
         String textBody = String.format(
@@ -175,18 +248,18 @@ public class UserService {
 
     @Transactional
     public void resetPassword(String token, String newPassword) {
-        User user = userRepository.findByResetToken(token);
+        Account account = accountRepository.find("resetToken", token).firstResult();
         
-        if (user == null || user.getResetTokenExpiresAt() == null || 
-            user.getResetTokenExpiresAt().isBefore(Instant.now())) {
+        if (account == null || account.getResetTokenExpiresAt() == null || 
+            account.getResetTokenExpiresAt().isBefore(Instant.now())) {
             throw new WebApplicationException("Token invalide ou expiré", Response.Status.BAD_REQUEST);
         }
 
         // Mettre à jour le mot de passe
-        user.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
-        user.setResetToken(null);
-        user.setResetTokenExpiresAt(null);
-        user.setUpdatedAt(Instant.now());
-        userRepository.persist(user);
+        account.setPasswordHash(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+        account.setResetToken(null);
+        account.setResetTokenExpiresAt(null);
+        account.setUpdatedAt(Instant.now());
+        accountRepository.persist(account);
     }
 }

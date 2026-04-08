@@ -31,7 +31,8 @@ public class GradeAverageController {
     public Response averageForStudentInClass(@PathParam("studentId") Long studentId,
                                              @PathParam("classroomId") Long classroomId,
                                              @QueryParam("rule") @DefaultValue("C") String rule) {
-        List<Grade> grades = gradeRepository.list("student.id = ?1 and classroom.id = ?2", studentId, classroomId);
+        // Requête via evaluation.classroom.id (plus de lien direct grade → classroom)
+        List<Grade> grades = gradeRepository.findByStudentIdAndClassroomId(studentId, classroomId);
 
         BigDecimal totalWeighted = BigDecimal.ZERO;
         int totalCoefficient = 0;
@@ -46,12 +47,17 @@ public class GradeAverageController {
                 } else if (exclude) {
                     continue;
                 } else {
-                    continue; // par défaut exclure nulls si non spécifié
+                    continue;
                 }
             }
 
-            int coef = g.getCoefficient() != null ? g.getCoefficient() : 1;
-            BigDecimal max = g.getMaxValue() != null ? g.getMaxValue() : BigDecimal.ONE;
+            // Lire coefficient et maxValue depuis l'évaluation (source unique de vérité)
+            int coef = 1;
+            BigDecimal max = BigDecimal.valueOf(20);
+            if (g.getEvaluation() != null) {
+                coef = g.getEvaluation().getCoefficient() != null ? g.getEvaluation().getCoefficient() : 1;
+                max = g.getEvaluation().getMaxValue() != null ? g.getEvaluation().getMaxValue() : BigDecimal.valueOf(20);
+            }
             if (max.compareTo(BigDecimal.ZERO) == 0) continue;
 
             BigDecimal normalized = value.divide(max, 6, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(20));
@@ -70,4 +76,3 @@ public class GradeAverageController {
         return Response.ok(new ApiResponse<>(200, "Moyenne calculée", resp)).build();
     }
 }
-

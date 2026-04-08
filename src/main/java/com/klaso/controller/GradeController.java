@@ -23,8 +23,8 @@ public class GradeController {
     @GET
     public Response getAll() {
         List<Grade> grades = gradeService.getAll();
-        List<GradeDto> GradeDto = grades.stream().map(GradeDto::new).collect(Collectors.toList());
-        return Response.ok(new ApiResponse<>(200,"Liste des notes",GradeDto)).build();
+        List<GradeDto> dtos = grades.stream().map(GradeDto::new).collect(Collectors.toList());
+        return Response.ok(new ApiResponse<>(200, "Liste des notes", dtos)).build();
     }
 
     @GET
@@ -57,34 +57,13 @@ public class GradeController {
     }
 
     @GET
-    @Path("/classroom/{classroomId}")
-    public Response getByClassroomId(@PathParam("classroomId") Long classroomId) {
-        List<Grade> grades = gradeService.getGradesByClassroomId(classroomId);
+    @Path("/evaluation/{evaluationId}")
+    public Response getByEvaluationId(@PathParam("evaluationId") Long evaluationId) {
+        List<Grade> grades = gradeService.getGradesByEvaluationId(evaluationId);
         List<GradeDto> gradeDtos = grades.stream().map(GradeDto::new).collect(Collectors.toList());
-
-        String message;
-        if (!gradeDtos.isEmpty()) {
-            GradeDto firstGrade = gradeDtos.get(0);
-            message = "Notes de la classe " + firstGrade.getClassroomName();
-        } else {
-            message = "Aucune note trouvée pour cette classe";
-        }
-
-        return Response.ok(new ApiResponse<>(200, message, gradeDtos)).build();
-    }
-
-    @GET
-    @Path("/student/{studentId}/classroom/{classroomId}")
-    public Response getByStudentAndClassroom(@PathParam("studentId") Long studentId,
-                                             @PathParam("classroomId") Long classroomId) {
-        List<Grade> grades = gradeService.getGradesByStudentAndClassroom(studentId, classroomId);
-        List<GradeDto> gradeDtos = grades.stream().map(GradeDto::new).collect(Collectors.toList());
-
         String message = gradeDtos.isEmpty()
-                ? "Aucune note trouvée pour cet élève dans cette classe"
-                : "Notes de l'élève " + gradeDtos.get(0).getStudentFirstName() + " " +
-                  gradeDtos.get(0).getStudentLastName() + " dans la classe " + gradeDtos.get(0).getClassroomName();
-
+                ? "Aucune note trouvée pour cette évaluation"
+                : "Notes de l'évaluation";
         return Response.ok(new ApiResponse<>(200, message, gradeDtos)).build();
     }
 
@@ -97,8 +76,8 @@ public class GradeController {
 
     @PUT
     @Path("/{id}")
-    public Response update(@PathParam("id") Long id, Grade grade) {
-        Grade updated = gradeService.update(id, grade);
+    public Response update(@PathParam("id") Long id, GradeDto gradeDto) {
+        Grade updated = gradeService.update(id, gradeDto);
         if (updated == null) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(new ApiResponse<>(404, "Note non trouvée", null)).build();

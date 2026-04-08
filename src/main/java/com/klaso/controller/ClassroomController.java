@@ -15,7 +15,7 @@ import java.util.List;
 @Path("/api/classrooms")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ClassroomController  {
+public class ClassroomController {
 
     @Inject
     ClassroomService classroomService;
@@ -43,7 +43,6 @@ public class ClassroomController  {
         return Response.ok(new ApiResponse<>(200, "Classe trouvée", dto)).build();
     }
 
-
     @POST
     public Response create(ClassroomDto classroomDto) {
         Classroom classroom = new Classroom();
@@ -59,7 +58,6 @@ public class ClassroomController  {
                 .entity(new ApiResponse<>(201, "Classe créée", dto)).build();
     }
 
-
     @GET
     @Path("/establishment/{establishmentId}")
     public Response getByEstablishmentId(@PathParam("establishmentId") Long establishmentId) {
@@ -70,7 +68,6 @@ public class ClassroomController  {
 
         return Response.ok(new ApiResponse<>(200, "Classes de l'établissement " + establishmentId, dtoList)).build();
     }
-
 
     @PUT
     @Path("/{id}")
@@ -84,7 +81,6 @@ public class ClassroomController  {
         ClassroomResponseDto dto = ClassroomResponseDto.fromEntity(updated);
         return Response.ok(new ApiResponse<>(200, "Classe mise à jour", dto)).build();
     }
-
 
     @DELETE
     @Path("/{id}")

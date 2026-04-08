@@ -23,14 +23,13 @@ public class EvaluationController {
     @POST
     public Response create(EvaluationDto dto) {
         Evaluation evaluation = new Evaluation();
-        evaluation.setSubject(dto.getSubject());
         evaluation.setGradeType(dto.getGradeType());
         evaluation.setMaxValue(dto.getMaxValue());
         evaluation.setCoefficient(dto.getCoefficient());
         evaluation.setEvaluationDate(dto.getEvaluationDate());
         evaluation.setDescription(dto.getDescription());
 
-        Evaluation saved = evaluationService.create(evaluation, dto.getClassroomId());
+        Evaluation saved = evaluationService.create(evaluation, dto.getClassroomId(), dto.getPeriodId());
         return Response.status(Response.Status.CREATED)
                 .entity(new ApiResponse<>(201, "Évaluation créée", new EvaluationDto(saved)))
                 .build();
@@ -57,4 +56,3 @@ public class EvaluationController {
         return Response.ok(new ApiResponse<>(200, message, dtos)).build();
     }
 }
-

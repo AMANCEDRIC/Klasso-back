@@ -8,21 +8,24 @@ import java.time.LocalDate;
 public class EvaluationDto {
     private Long id;
     private Long classroomId;
-    private String subject;
+    private Long periodId;
     private String gradeType;
     private BigDecimal maxValue;
     private Integer coefficient;
     private LocalDate evaluationDate;
     private String description;
 
-    public EvaluationDto() {}
+    public EvaluationDto() {
+    }
 
     public EvaluationDto(Evaluation evaluation) {
         this.id = evaluation.getId();
         if (evaluation.getClassroom() != null) {
             this.classroomId = evaluation.getClassroom().getId();
         }
-        this.subject = evaluation.getSubject();
+        if (evaluation.getPeriod() != null) {
+            this.periodId = evaluation.getPeriod().getId();
+        }
         this.gradeType = evaluation.getGradeType();
         this.maxValue = evaluation.getMaxValue();
         this.coefficient = evaluation.getCoefficient();
@@ -46,12 +49,12 @@ public class EvaluationDto {
         this.classroomId = classroomId;
     }
 
-    public String getSubject() {
-        return subject;
+    public Long getPeriodId() {
+        return periodId;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
+    public void setPeriodId(Long periodId) {
+        this.periodId = periodId;
     }
 
     public String getGradeType() {
@@ -94,4 +97,3 @@ public class EvaluationDto {
         this.description = description;
     }
 }
-

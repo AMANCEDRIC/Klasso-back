@@ -1,6 +1,5 @@
 package com.klaso.dto;
 
-
 public class ClassroomDto {
     public Long id;
 

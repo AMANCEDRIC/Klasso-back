@@ -6,21 +6,26 @@ import org.hibernate.annotations.ColumnDefault;
 import java.time.Instant;
 
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "permission")
+public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "email", nullable = false)
-    private String email;
+    @Column(name = "code", nullable = false, length = 100)
+    private String code;
 
-    @Column(name = "first_name", length = 100)
-    private String firstName;
+    @Column(name = "label", nullable = false)
+    private String label;
 
-    @Column(name = "last_name", length = 100)
-    private String lastName;
+    @ColumnDefault("1")
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    @ColumnDefault("0")
+    @Column(name = "deleted")
+    private Boolean deleted;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
@@ -38,28 +43,36 @@ public class User {
         this.id = id;
     }
 
-    public String getEmail() {
-        return email;
+    public String getCode() {
+        return code;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setCode(String code) {
+        this.code = code;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getLabel() {
+        return label;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
-    public String getLastName() {
-        return lastName;
+    public Boolean getIsActive() {
+        return isActive;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     public Instant getCreatedAt() {

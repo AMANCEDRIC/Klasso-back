@@ -6,4 +6,5 @@ public class UserRegisterDTO {
     public String firstName;
     public String lastName;
     public String password;
+    public String role; // "TEACHER" (défaut) ou "ADMIN"
 }

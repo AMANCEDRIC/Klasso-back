@@ -18,8 +18,9 @@ public class Evaluation {
     @JoinColumn(name = "classroom_id", nullable = false)
     private Classroom classroom;
 
-    @Column(name = "subject", length = 100)
-    private String subject;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "period_id")
+    private Period period;
 
     @Column(name = "grade_type", length = 50)
     private String gradeType;
@@ -59,12 +60,12 @@ public class Evaluation {
         this.classroom = classroom;
     }
 
-    public String getSubject() {
-        return subject;
+    public Period getPeriod() {
+        return period;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
+    public void setPeriod(Period period) {
+        this.period = period;
     }
 
     public String getGradeType() {
@@ -123,4 +124,3 @@ public class Evaluation {
         this.updatedAt = updatedAt;
     }
 }
-

@@ -3,41 +3,31 @@ package com.klaso.dto;
 import com.klaso.entity.Grade;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 public class GradeDto {
 
     private Long id;
     private BigDecimal value;
-    private BigDecimal maxValue;
-    private Integer coefficient;
-    private String gradeType;
-    private String subject;
-    private String description;
-    private LocalDate gradeDate;
+    private Boolean isAbsent;
+    private String appreciation;
+    private String status;
 
     private Long studentId;
     private String studentFirstName;
     private String studentLastName;
 
-    private Long classroomId;
-    private String classroomName;
-
     private Long evaluationId;
-    private String status;
 
     // Required by Jackson for deserialization of request bodies
-    public GradeDto() {}
+    public GradeDto() {
+    }
 
     public GradeDto(Grade grade) {
         this.id = grade.getId();
         this.value = grade.getValue();
-        this.maxValue = grade.getMaxValue();
-        this.coefficient = grade.getCoefficient();
-        this.gradeType = grade.getGradeType();
-        this.subject = grade.getSubject();
-        this.description = grade.getDescription();
-        this.gradeDate = grade.getGradeDate();
+        this.isAbsent = grade.getIsAbsent();
+        this.appreciation = grade.getAppreciation();
+        this.status = grade.getStatus();
 
         if (grade.getStudent() != null) {
             this.studentId = grade.getStudent().getId();
@@ -45,16 +35,9 @@ public class GradeDto {
             this.studentLastName = grade.getStudent().getLastName();
         }
 
-        if (grade.getClassroom() != null) {
-            this.classroomId = grade.getClassroom().getId();
-            this.classroomName = grade.getClassroom().getName();
-        }
-
         if (grade.getEvaluation() != null) {
             this.evaluationId = grade.getEvaluation().getId();
         }
-
-        this.status = grade.getStatus();
     }
 
     public Long getId() {
@@ -73,52 +56,28 @@ public class GradeDto {
         this.value = value;
     }
 
-    public BigDecimal getMaxValue() {
-        return maxValue;
+    public Boolean getIsAbsent() {
+        return isAbsent;
     }
 
-    public void setMaxValue(BigDecimal maxValue) {
-        this.maxValue = maxValue;
+    public void setIsAbsent(Boolean isAbsent) {
+        this.isAbsent = isAbsent;
     }
 
-    public Integer getCoefficient() {
-        return coefficient;
+    public String getAppreciation() {
+        return appreciation;
     }
 
-    public void setCoefficient(Integer coefficient) {
-        this.coefficient = coefficient;
+    public void setAppreciation(String appreciation) {
+        this.appreciation = appreciation;
     }
 
-    public String getGradeType() {
-        return gradeType;
+    public String getStatus() {
+        return status;
     }
 
-    public void setGradeType(String gradeType) {
-        this.gradeType = gradeType;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public LocalDate getGradeDate() {
-        return gradeDate;
-    }
-
-    public void setGradeDate(LocalDate gradeDate) {
-        this.gradeDate = gradeDate;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public Long getStudentId() {
@@ -145,21 +104,11 @@ public class GradeDto {
         this.studentLastName = studentLastName;
     }
 
-    public Long getClassroomId() {
-        return classroomId;
+    public Long getEvaluationId() {
+        return evaluationId;
     }
 
-    public void setClassroomId(Long classroomId) {
-        this.classroomId = classroomId;
+    public void setEvaluationId(Long evaluationId) {
+        this.evaluationId = evaluationId;
     }
-
-    public String getClassroomName() {
-        return classroomName;
-    }
-
-    public void setClassroomName(String classroomName) {
-        this.classroomName = classroomName;
-    }
-
-
 }

@@ -29,6 +29,8 @@ public class EvaluationGradesController {
             public Long studentId;
             public java.math.BigDecimal value;
             public String status; // PRESENT, ABSENT_JUSTIFIED, ABSENT_UNJUSTIFIED, NOT_SUBMITTED
+            public Boolean isAbsent;
+            public String appreciation;
         }
         public List<Item> grades;
     }
@@ -70,17 +72,15 @@ public class EvaluationGradesController {
             if (grade == null) {
                 grade = new Grade();
                 grade.setEvaluation(evaluation);
-                grade.setClassroom(evaluation.getClassroom());
                 grade.setStudent(student);
                 grade.setCreatedAt(Instant.now());
             }
             grade.setValue(item.value);
             grade.setStatus(item.status);
-            grade.setMaxValue(evaluation.getMaxValue());
-            grade.setCoefficient(evaluation.getCoefficient());
-            grade.setGradeType(evaluation.getGradeType());
-            grade.setSubject(evaluation.getSubject());
-            grade.setGradeDate(evaluation.getEvaluationDate());
+            if (item.isAbsent != null) {
+                grade.setIsAbsent(item.isAbsent);
+            }
+            grade.setAppreciation(item.appreciation);
             grade.setUpdatedAt(Instant.now());
 
             if (grade.getId() == null) {
@@ -93,4 +93,3 @@ public class EvaluationGradesController {
         return Response.ok(new ApiResponse<>(200, "Notes enregistrées", dtos)).build();
     }
 }
-

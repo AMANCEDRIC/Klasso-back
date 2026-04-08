@@ -27,6 +27,12 @@ public class Establishment {
     @Column(name = "country", length = 100)
     private String country;
 
+    @Column(name = "period_type", length = 50)
+    private String periodType;
+
+    @Column(name = "academic_year", length = 20)
+    private String academicYear;
+
     @Column(name = "created_at")
     private Instant createdAt;
 
@@ -79,6 +85,22 @@ public class Establishment {
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public String getPeriodType() {
+        return periodType;
+    }
+
+    public void setPeriodType(String periodType) {
+        this.periodType = periodType;
+    }
+
+    public String getAcademicYear() {
+        return academicYear;
+    }
+
+    public void setAcademicYear(String academicYear) {
+        this.academicYear = academicYear;
     }
 
     public Instant getCreatedAt() {
