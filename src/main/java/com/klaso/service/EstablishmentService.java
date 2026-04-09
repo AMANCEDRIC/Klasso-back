@@ -26,6 +26,9 @@ public class EstablishmentService {
     @Inject
     JsonWebToken jwt;
 
+    @Inject
+    PeriodService periodService;
+
     private Account getCurrentAccount() {
         String username = jwt.getName();
         if (username == null) return null;
@@ -56,6 +59,9 @@ public class EstablishmentService {
         establishment.setCreatedAt(Instant.now());
         establishment.setUpdatedAt(Instant.now());
         establishmentRepository.persist(establishment);
+        
+        // Création automatique des périodes (T1, T2, T3 ou S1, S2)
+        periodService.createDefaultPeriods(establishment);
         
         // Charger explicitement les infos pour éviter la LazyInitializationException
         if (establishment.getOwner() != null && establishment.getOwner().getUser() != null) {

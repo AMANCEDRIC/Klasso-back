@@ -1,7 +1,9 @@
 package com.klaso.controller;
 
 import com.klaso.dto.ApiResponse;
+import com.klaso.dto.StudentAverageDto;
 import com.klaso.entity.Grade;
+import com.klaso.entity.Student;
 import com.klaso.repository.GradeRepository;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -21,6 +23,9 @@ public class GradeAverageController {
     @Inject
     GradeRepository gradeRepository;
 
+    @Inject
+    com.klaso.repository.StudentRepository studentRepository;
+
     public static class AverageResponse {
         public String rule;
         public BigDecimal weightedAverage;
@@ -33,9 +38,69 @@ public class GradeAverageController {
     public Response averageForStudentInClass(@PathParam("studentId") Long studentId,
                                              @PathParam("classroomId") Long classroomId,
                                              @QueryParam("rule") @DefaultValue("C") String rule) {
-        // Requête via evaluation.classroom.id (plus de lien direct grade → classroom)
         List<Grade> grades = gradeRepository.findByStudentIdAndClassroomId(studentId, classroomId);
+        return Response.ok(new ApiResponse<>(200, "Moyenne calculée", calculate(grades, rule))).build();
+    }
 
+    @GET
+    @Path("/student/{studentId}/classroom/{classroomId}/period/{periodId}")
+    public Response averageForStudentInClassByPeriod(@PathParam("studentId") Long studentId,
+                                                     @PathParam("classroomId") Long classroomId,
+                                                     @PathParam("periodId") Long periodId,
+                                                     @QueryParam("rule") @DefaultValue("C") String rule) {
+        List<Grade> grades = gradeRepository.findByStudentIdAndClassroomIdAndPeriodId(studentId, classroomId, periodId);
+        return Response.ok(new ApiResponse<>(200, "Moyenne de période calculée", calculate(grades, rule))).build();
+    }
+
+    @GET
+    @Path("/classroom/{classroomId}")
+    public Response averageForClass(@PathParam("classroomId") Long classroomId,
+                                    @QueryParam("rule") @DefaultValue("C") String rule) {
+        List<Grade> grades = gradeRepository.findByClassroomId(classroomId);
+        return Response.ok(new ApiResponse<>(200, "Moyenne de classe calculée", calculate(grades, rule))).build();
+    }
+
+    @GET
+    @Path("/classroom/{classroomId}/period/{periodId}")
+    public Response averageForClassByPeriod(@PathParam("classroomId") Long classroomId,
+                                            @PathParam("periodId") Long periodId,
+                                            @QueryParam("rule") @DefaultValue("C") String rule) {
+        List<Grade> grades = gradeRepository.list("evaluation.classroom.id = ?1 and evaluation.period.id = ?2", classroomId, periodId);
+        return Response.ok(new ApiResponse<>(200, "Moyenne de classe (période) calculée", calculate(grades, rule))).build();
+    }
+
+    @GET
+    @Path("/classroom/{classroomId}/dashboard")
+    public Response classDashboard(@PathParam("classroomId") Long classroomId,
+                                   @QueryParam("periodId") Long periodId,
+                                   @QueryParam("rule") @DefaultValue("C") String rule) {
+        List<Student> students = studentRepository.findActiveStudentsByClassroom(classroomId);
+        java.util.List<StudentAverageDto> dashboard = new java.util.ArrayList<>();
+
+        for (Student s : students) {
+            List<Grade> annualGrades = gradeRepository.findByStudentIdAndClassroomId(s.getId(), classroomId);
+            AverageResponse annual = calculate(annualGrades, rule);
+
+            AverageResponse period = null;
+            if (periodId != null) {
+                List<Grade> periodGrades = gradeRepository.findByStudentIdAndClassroomIdAndPeriodId(s.getId(), classroomId, periodId);
+                period = calculate(periodGrades, rule);
+            }
+
+            dashboard.add(new StudentAverageDto(
+                s.getId(),
+                s.getFirstName(),
+                s.getLastName(),
+                annual.weightedAverage,
+                period != null ? period.weightedAverage : null,
+                annualGrades.size()
+            ));
+        }
+
+        return Response.ok(new ApiResponse<>(200, "Dashboard de classe", dashboard)).build();
+    }
+
+    private AverageResponse calculate(List<Grade> grades, String rule) {
         BigDecimal totalWeighted = BigDecimal.ZERO;
         int totalCoefficient = 0;
 
@@ -53,7 +118,6 @@ public class GradeAverageController {
                 }
             }
 
-            // Lire coefficient et maxValue depuis l'évaluation (source unique de vérité)
             int coef = 1;
             BigDecimal max = BigDecimal.valueOf(20);
             if (g.getEvaluation() != null) {
@@ -74,7 +138,7 @@ public class GradeAverageController {
         resp.weightedAverage = totalCoefficient == 0
                 ? BigDecimal.ZERO
                 : totalWeighted.divide(BigDecimal.valueOf(totalCoefficient), 2, RoundingMode.HALF_UP);
-
-        return Response.ok(new ApiResponse<>(200, "Moyenne calculée", resp)).build();
+        
+        return resp;
     }
 }

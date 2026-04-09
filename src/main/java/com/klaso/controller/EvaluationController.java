@@ -57,4 +57,13 @@ public class EvaluationController {
         String message = dtos.isEmpty() ? "Aucune évaluation" : "Évaluations de la classe";
         return Response.ok(new ApiResponse<>(200, message, dtos)).build();
     }
+
+    @GET
+    @Path("/classroom/{classroomId}/period/{periodId}")
+    public Response getByClassroomAndPeriod(@PathParam("classroomId") Long classroomId, @PathParam("periodId") Long periodId) {
+        List<Evaluation> list = evaluationService.listByClassroomAndPeriod(classroomId, periodId);
+        List<EvaluationDto> dtos = list.stream().map(EvaluationDto::new).collect(Collectors.toList());
+        String message = dtos.isEmpty() ? "Aucune évaluation pour cette période" : "Évaluations de la classe pour la période";
+        return Response.ok(new ApiResponse<>(200, message, dtos)).build();
+    }
 }

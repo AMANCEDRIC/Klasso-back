@@ -24,4 +24,8 @@ public class GradeRepository implements PanacheRepository<Grade> {
     public List<Grade> findByStudentIdAndClassroomId(Long studentId, Long classroomId) {
         return list("student.id = ?1 and evaluation.classroom.id = ?2", studentId, classroomId);
     }
+
+    public List<Grade> findByStudentIdAndClassroomIdAndPeriodId(Long studentId, Long classroomId, Long periodId) {
+        return list("student.id = ?1 and evaluation.classroom.id = ?2 and evaluation.period.id = ?3", studentId, classroomId, periodId);
+    }
 }

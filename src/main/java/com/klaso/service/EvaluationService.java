@@ -33,6 +33,12 @@ public class EvaluationService {
         return evaluationRepository.findByClassroomId(classroomId);
     }
 
+    public List<Evaluation> listByClassroomAndPeriod(Long classroomId, Long periodId) {
+        // Sécurisé par classroomService
+        classroomService.findById(classroomId);
+        return evaluationRepository.findByClassroomAndPeriod(classroomId, periodId);
+    }
+
     public Evaluation findById(Long id) {
         Evaluation evaluation = evaluationRepository.findById(id);
         if (evaluation == null) return null;
