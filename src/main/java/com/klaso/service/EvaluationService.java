@@ -41,11 +41,12 @@ public class EvaluationService {
 
     public Evaluation findById(Long id) {
         Evaluation evaluation = evaluationRepository.findById(id);
-        if (evaluation == null) return null;
-        
+        if (evaluation == null)
+            return null;
+
         // Sécurisé par classroomService via l'établissement
         classroomService.findById(evaluation.getClassroom().getId());
-        
+
         return evaluation;
     }
 

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Path("/api/evaluations")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@RolesAllowed({"TEACHER", "ADMIN"})
+@RolesAllowed({ "TEACHER", "ADMIN" })
 public class EvaluationController {
 
     @Inject
@@ -60,10 +60,12 @@ public class EvaluationController {
 
     @GET
     @Path("/classroom/{classroomId}/period/{periodId}")
-    public Response getByClassroomAndPeriod(@PathParam("classroomId") Long classroomId, @PathParam("periodId") Long periodId) {
+    public Response getByClassroomAndPeriod(@PathParam("classroomId") Long classroomId,
+            @PathParam("periodId") Long periodId) {
         List<Evaluation> list = evaluationService.listByClassroomAndPeriod(classroomId, periodId);
         List<EvaluationDto> dtos = list.stream().map(EvaluationDto::new).collect(Collectors.toList());
-        String message = dtos.isEmpty() ? "Aucune évaluation pour cette période" : "Évaluations de la classe pour la période";
+        String message = dtos.isEmpty() ? "Aucune évaluation pour cette période"
+                : "Évaluations de la classe pour la période";
         return Response.ok(new ApiResponse<>(200, message, dtos)).build();
     }
 }
