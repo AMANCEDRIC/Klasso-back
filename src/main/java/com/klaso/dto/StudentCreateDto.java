@@ -11,16 +11,18 @@ public class StudentCreateDto {
     private String parentEmail;
     private String parentPhone;
     private Long classroomId;
+    private String gender;
 
     // Constructeurs
     public StudentCreateDto() {
     }
 
-    public StudentCreateDto(String firstName, String lastName, LocalDate dateOfBirth,
+    public StudentCreateDto(String firstName, String lastName, String gender, LocalDate dateOfBirth,
             String email, String parentName, String parentEmail,
             String parentPhone, Long classroomId) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.gender = gender;
         this.dateOfBirth = dateOfBirth;
         this.email = email;
         this.parentName = parentName;
@@ -92,5 +94,13 @@ public class StudentCreateDto {
 
     public void setClassroomId(Long classroomId) {
         this.classroomId = classroomId;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }

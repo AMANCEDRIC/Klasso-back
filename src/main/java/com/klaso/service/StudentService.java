@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotFoundException;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -25,10 +26,11 @@ public class StudentService {
     @Inject
     ClassroomService classroomService;
 
-    public ApiResponse<List<Student>> getAllStudents() {
+    @Transactional
+    public ApiResponse<List<StudentResponseDto>> getAllStudents() {
         // Un admin voit tout, un prof voit uniquement ses élèves
         List<Student> all = studentRepository.listAll();
-        List<Student> filtered = all.stream()
+        List<StudentResponseDto> filtered = all.stream()
                 .filter(s -> {
                     try {
                         if (s.getClassroom() != null) {
@@ -39,29 +41,45 @@ public class StudentService {
                         return false;
                     }
                 })
+                .map(StudentResponseDto::new)
                 .collect(Collectors.toList());
         return new ApiResponse<>(200, "Liste des élèves", filtered);
     }
 
-    public ApiResponse<List<Student>> getStudentsByClassroom(Long classroomId) {
+    @Transactional
+    public ApiResponse<List<StudentResponseDto>> getStudentsByClassroom(Long classroomId) {
         // classroomService.findById jette ForbiddenException si pas d'accès
         classroomService.findById(classroomId);
         List<Student> students = studentRepository.findByClassroomId(classroomId);
-        return new ApiResponse<>(200, "Élèves de la classe " + classroomId, students);
+        List<StudentResponseDto> dtos = students.stream()
+                .map(StudentResponseDto::new)
+                .collect(Collectors.toList());
+        return new ApiResponse<>(200, "Élèves de la classe " + classroomId, dtos);
     }
 
-    public ApiResponse<Student> getStudentById(Long id) {
+    @Transactional
+    public ApiResponse<StudentResponseDto> getStudentById(Long id) {
+        try {
+            Student student = getStudentEntity(id);
+            return new ApiResponse<>(200, "Détails de l'élève", new StudentResponseDto(student));
+        } catch (NotFoundException e) {
+            return new ApiResponse<>(404, e.getMessage(), null);
+        } catch (ForbiddenException e) {
+            throw e; // Laisser l'exception de sécurité remonter
+        }
+    }
+
+    private Student getStudentEntity(Long id) {
         Student student = studentRepository.findById(id);
         if (student == null) {
-            return new ApiResponse<>(404, "Élève non trouvé", null);
+            throw new NotFoundException("Élève non trouvé");
         }
         
         // Vérifie l'accès via la classe
         if (student.getClassroom() != null) {
             classroomService.findById(student.getClassroom().getId());
         }
-        
-        return new ApiResponse<>(200, "Détails de l'élève", student);
+        return student;
     }
 
     @Transactional
@@ -75,6 +93,7 @@ public class StudentService {
         Student student = new Student();
         student.setFirstName(studentDto.getFirstName());
         student.setLastName(studentDto.getLastName());
+        student.setGender(studentDto.getGender());
         student.setDateOfBirth(studentDto.getDateOfBirth());
         student.setEmail(studentDto.getEmail());
         student.setParentName(studentDto.getParentName());
@@ -94,12 +113,12 @@ public class StudentService {
 
     @Transactional
     public ApiResponse<StudentResponseDto> updateStudent(Long id, StudentCreateDto updatedDto) {
-        // findById sécurisé
-        ApiResponse<Student> response = getStudentById(id);
-        if (response.getStatus() != 200) {
-            return new ApiResponse<>(response.getStatus(), response.getMessage(), null);
+        Student existing;
+        try {
+            existing = getStudentEntity(id);
+        } catch (NotFoundException e) {
+            return new ApiResponse<>(404, e.getMessage(), null);
         }
-        Student existing = response.getData();
 
         Classroom classroom = null;
         if (updatedDto.getClassroomId() != null) {
@@ -108,6 +127,7 @@ public class StudentService {
 
         existing.setFirstName(updatedDto.getFirstName());
         existing.setLastName(updatedDto.getLastName());
+        existing.setGender(updatedDto.getGender());
         existing.setEmail(updatedDto.getEmail());
         existing.setDateOfBirth(updatedDto.getDateOfBirth());
         existing.setParentName(updatedDto.getParentName());
@@ -122,11 +142,12 @@ public class StudentService {
 
     @Transactional
     public ApiResponse<Void> deleteStudent(Long id) {
-        ApiResponse<Student> response = getStudentById(id);
-        if (response.getStatus() != 200) {
-            return new ApiResponse<>(response.getStatus(), response.getMessage(), null);
+        try {
+            Student student = getStudentEntity(id);
+            studentRepository.delete(student);
+            return new ApiResponse<>(200, "Élève supprimé", null);
+        } catch (NotFoundException e) {
+            return new ApiResponse<>(404, e.getMessage(), null);
         }
-        studentRepository.delete(response.getData());
-        return new ApiResponse<>(200, "Élève supprimé", null);
     }
 }

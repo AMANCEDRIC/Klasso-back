@@ -22,21 +22,21 @@ public class StudentController {
 
     @GET
     public Response getAllStudents() {
-        ApiResponse<List<Student>> response = studentService.getAllStudents();
+        ApiResponse<List<StudentResponseDto>> response = studentService.getAllStudents();
         return Response.status(response.getStatus()).entity(response).build();
     }
 
     @GET
     @Path("/classroom/{classroomId}")
     public Response getStudentsByClassroom(@PathParam("classroomId") Long classroomId) {
-        ApiResponse<List<Student>> response = studentService.getStudentsByClassroom(classroomId);
+        ApiResponse<List<StudentResponseDto>> response = studentService.getStudentsByClassroom(classroomId);
         return Response.status(response.getStatus()).entity(response).build();
     }
 
     @GET
     @Path("/{id}")
     public Response getStudentById(@PathParam("id") Long id) {
-        ApiResponse<Student> response = studentService.getStudentById(id);
+        ApiResponse<StudentResponseDto> response = studentService.getStudentById(id);
         return Response.status(response.getStatus()).entity(response).build();
     }
 

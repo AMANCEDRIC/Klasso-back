@@ -16,11 +16,13 @@ public class StudentResponseDto {
     public String classroomName;
     public String classroomLevel;
     public String establishmentName;
+    public String gender;
 
     public StudentResponseDto(Student student) {
         this.id = student.getId();
         this.firstName = student.getFirstName();
         this.lastName = student.getLastName();
+        this.gender = student.getGender();
         this.dateOfBirth = student.getDateOfBirth();
         this.email = student.getEmail();
         this.parentName = student.getParentName();

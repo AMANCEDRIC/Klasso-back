@@ -34,8 +34,7 @@ public class Evaluation {
     @Column(name = "evaluation_date")
     private LocalDate evaluationDate;
 
-    @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "created_at")

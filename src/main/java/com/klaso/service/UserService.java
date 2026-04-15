@@ -262,4 +262,26 @@ public class UserService {
         account.setUpdatedAt(Instant.now());
         accountRepository.persist(account);
     }
+
+    // --- Admin Features ---
+
+    public java.util.List<Account> getAllAccounts() {
+        return accountRepository.find("deleted", false).list();
+    }
+
+    @Transactional
+    public void toggleBlock(Long accountId) {
+        Account account = accountRepository.findById(accountId);
+        if (account == null) throw new jakarta.ws.rs.WebApplicationException("Compte introuvable", jakarta.ws.rs.core.Response.Status.NOT_FOUND);
+        account.setIsActive(!Boolean.TRUE.equals(account.getIsActive()));
+        account.setUpdatedAt(java.time.Instant.now());
+    }
+
+    @Transactional
+    public void softDelete(Long accountId) {
+        Account account = accountRepository.findById(accountId);
+        if (account == null) throw new jakarta.ws.rs.WebApplicationException("Compte introuvable", jakarta.ws.rs.core.Response.Status.NOT_FOUND);
+        account.setDeleted(true);
+        account.setUpdatedAt(java.time.Instant.now());
+    }
 }

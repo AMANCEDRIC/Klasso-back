@@ -23,6 +23,7 @@ public class ClassroomService {
     @Inject
     EstablishmentService establishmentService;
 
+    @Transactional
     public List<Classroom> getAll() {
         // Pour des raisons de sécurité, on filtre globalement
         // Un admin voit tout, un prof voit uniquement ses classes
@@ -30,6 +31,7 @@ public class ClassroomService {
         return all.stream()
                 .filter(c -> {
                     try {
+                        if (c.getEstablishment() == null) return false;
                         establishmentService.findById(c.getEstablishment().getId());
                         return true;
                     } catch (ForbiddenException e) {

@@ -19,8 +19,7 @@ public class Grade {
     @Column(name = "is_absent")
     private Boolean isAbsent = false;
 
-    @Lob
-    @Column(name = "appreciation")
+    @Column(name = "appreciation", columnDefinition = "TEXT")
     private String appreciation;
 
     @ManyToOne(fetch = FetchType.LAZY)

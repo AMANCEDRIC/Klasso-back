@@ -44,6 +44,9 @@ public class Student {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    @Column(name = "gender", length = 10)
+    private String gender;
+
     @Column(name = "created_at")
     private Instant createdAt;
 
@@ -72,6 +75,14 @@ public class Student {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public LocalDate getDateOfBirth() {

@@ -10,6 +10,8 @@ public class UserResponseDTO {
     public String firstName;
     public String lastName;
     public String role;
+    public Long accountId;
+    public boolean isBlocked;
 
     public UserResponseDTO(User user) {
         this.id = user.getId();
@@ -25,6 +27,8 @@ public class UserResponseDTO {
 
     public UserResponseDTO(Account account) {
         this(account.getUser());
+        this.accountId = account.getId();
+        this.isBlocked = !Boolean.TRUE.equals(account.getIsActive());
         if (account.getProfile() != null) {
             this.role = account.getProfile().getCode();
         }

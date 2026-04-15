@@ -109,7 +109,16 @@ public class EstablishmentService {
 
         // Sinon, on vérifie que c'est bien le propriétaire
         Account current = getCurrentAccount();
-        if (current == null || !establishment.getOwner().getId().equals(current.getId())) {
+        if (current == null) {
+            throw new ForbiddenException("Authentification requise pour accéder à cet établissement.");
+        }
+
+        // Si l'établissement n'a pas encore de propriétaire, on autorise l'accès (cas de migration/init)
+        if (establishment.getOwner() == null) {
+            return establishment;
+        }
+
+        if (!establishment.getOwner().getId().equals(current.getId())) {
             throw new ForbiddenException("Vous n'avez pas accès à cet établissement.");
         }
 
